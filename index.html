@@ -10,33 +10,69 @@
   <script src="data.js"></script>
 </head>
 <body>
-<div id="root">Корневой элемент</div>
+<div id="root"></div>
 <script type="text/babel">
   const container = document.getElementById('root');
   const root = ReactDOM.createRoot(container);
-  root.render(<App cardsData={images}/>);
+  root.render(<App images={images} visibleItems={visibleItems} finishedItems={finishedItems}/>);
 
-  function App({cardsData = []}) {
-    const cards = cardsData.map((item) => (
-      <Card item={item} key={item.id} />
-    ));
+  function App({images = [], visibleItems = [], finishedItems = []}) {
+    // Используем деструктуризацию параметров с указанием значений по умолчанию.
+    // Так мы явно показываем, какие параметры ждёт приложение и исключаем ошибки,
+    // если часть параметров не определена.
 
+    // Выносим сетку карточек в отдельный компонент, чтобы разделить ответственность.
+    // Задача приложения на этом этапе - отрисовать сетку карточек.
     return (
       <section className="game container">
-        <ul className="cards cards-theme-cars">
-          {cards}
-        </ul>
+        <Grid images={images} visibleItems={visibleItems} finishedItems={finishedItems} />
       </section>
     );
   }
 
-  function Card({item}) {
-    const {url, description} = item;
-    const visible = visibleItems.includes(item.id) ? ' card-show' : '';
-    const finished = finishedItems.includes(item.id) ? ' card-finished' : '';
+  function Grid({images, visibleItems, finishedItems}) {
+    // Компонент сетки должен отрисовать список карточек из данных.
+    // Список элементов формируется в JSX преобразованием массива данных.
+    // Каждая карточка получает нужные для отрисовки параметры.
+    // Дополнительно определяем статус каждой карточки isVisible и isFinished,
+    // сравнивая идентификатор карточки со списками выделенных.
     return (
-      <li className={`card${visible}${finished}`}>
-        <img src={url} width="204" height="144" alt={description} />
+      <ul className="cards">
+        {images.map((item) => (
+          <Card
+            key={item.id}
+            url={item.url}
+            description={item.description}
+            isVisible={visibleItems.includes(item.id)}
+            isFinished={finishedItems.includes(item.id)}
+          />
+        ))}
+      </ul>
+    );
+  }
+
+  function Card({url, description, isVisible, isFinished}) {
+    // Для отображения статуса карточки формируем список классов элемента.
+    // У карточки может быть три разных состояния, которыми управляют два параметра.
+    // Для каждого параметра независимо добавляем название класса или пустую строку.
+    // Используем условный оператор в интерполяции шаблонной строки.
+    // Названия классов мы нашли в готовой вёрстке.
+    const className = `${
+      isVisible ? 'card-show' : ''
+    } ${
+      isFinished ? 'card-finished' : ''
+    }`;
+    // В любом состоянии у элемента должен быть класс card,
+    // поэтому мы добавляем вычисленные для состояния классы.
+    // Используем интерполяцию шаблонной строки.
+    // Для вычисления значений в JSX-атрибутах используем фигурные скобки.
+    return (
+      <li className={`card ${className}`}>
+        <img
+          width="204" height="144"
+          src={url}
+          alt={description}
+        />
       </li>
     );
   }
